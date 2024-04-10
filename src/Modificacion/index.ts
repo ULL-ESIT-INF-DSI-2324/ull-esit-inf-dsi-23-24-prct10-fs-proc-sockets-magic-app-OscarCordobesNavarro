@@ -12,8 +12,8 @@
 import fs from "fs";
 import path from "path";
 import chalk from "chalk";
-import { Color } from "../IColor.js";
-import { ICard } from "../ICard.js";
+import { Color } from "../Previo/IColor.js";
+import { ICard } from "../Previo/ICard.js";
 
 export class CardCollectionsHandlerAsync {
   private userCollectionPath: string = "./data/";

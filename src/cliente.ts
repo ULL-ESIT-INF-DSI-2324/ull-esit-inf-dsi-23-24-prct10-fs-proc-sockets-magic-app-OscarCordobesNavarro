@@ -12,9 +12,20 @@
 
 import net from "net";
 
-const client = net.connect({ port: 60300 });
 
-client.on("connect", () => {
-  console.log("Cliente conectado satisfactoriamente");
-});
+export class MagicClient {
+  private socket: net.Socket;
+
+  constructor(private puerto: number = 60300) {
+    this.puerto = puerto;
+    this.socket = net.connect({ port: this.puerto });
+  }
+
+  public enviarArgumentos(argumentos: string): void {
+    console.log("Argumentos del cliente: " + argumentos)
+    this.socket.write(JSON.stringify(argumentos));
+  }
+}
+
+
 
