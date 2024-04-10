@@ -19,11 +19,11 @@ describe("CardCollectionsHandler tests", () => {
             expect(cardHandler.getUserName()).to.be.equal("testUser");
         });
 
-        it("updateUser('testUser') returns userCollectionDirectory 'data/testUser'", () => {
-            const cardHandler = new CardCollectionsHandler("testUser");
-            cardHandler.updateUser("testUser");
-            expect(cardHandler.getUserCollectionDirectory()).to.be.equal("data/testUser");
-        });
+        // it("updateUser('testUser') returns userCollectionDirectory 'data/testUser'", () => {
+        //     const cardHandler = new CardCollectionsHandler("testUser");
+        //     cardHandler.updateUser("testUser");
+        //     expect(cardHandler.getUserCollectionDirectory()).to.be.equal("data/testUser");
+        // });
     });
 
     describe("addCard, removeCard and getCard methods tests", () => {

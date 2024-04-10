@@ -7,215 +7,351 @@
  * Autor: Óscar Cordobés Navarro
  * Correo: alu0101478081@ull.edu.es
  * Fecha: 10/04/2024
- * Práctica 10: Aplicación cliente-servidor para coleccionistas de cartas Magic
+ * Práctica 10: Modificacion PE101
  */
+import fs from "fs";
+import path from "path";
+import chalk from "chalk";
+import { Color } from "../IColor.js";
+import { ICard } from "../ICard.js";
 
-// Ejemplo de uso de peticion http
+export class CardCollectionsHandlerAsync {
+  private userCollectionPath: string = "./data/";
+  private userName: string = "";
+  private userDirectory: string = "";
 
-import request from "request";
-
-// const location = process.argv[2];
-
-// const url = `http://api.weatherstack.com/current?access_key=aeb97bf5fbae1e796215bb0be875d548&query=${location}&units=m`;
-
-// request({ url: url, json: true }, (error: Error, response) => {
-//   if (error) {
-//     console.log(error);
-//   } else {
-//     console.log(response.body);
-//   }
-// });
-
-// Ejecución del programa -> node dist/index.js 'San Cristobal de La Laguna, Spain'
-
-// -------- Patrón Callback --------
-
-/**
- * Estamos encapsulando la logica de la peticion http en una función.
- * Pero vemos que dentro tenemos "request" que es una función que recibe un callback.
- * La respuesta de la api se maneja en el callback y no puede salir de la función.
- *
- * El manejador se ejecuta de forma asíncrona, por lo que no podemos devolver la respuesta de la api.
- *
- * Para solucionar esto, podemos aplicar el patrón callback.
- *
- */
-// function weatherInfo(location: string) {
-//   const url = `http://api.weatherstack.com/current?access_key=aeb97bf5fbae1e796215bb0be875d548&query=${encodeURIComponent(location)}&units=m`;
-
-//   request({url: url, json: true}, (error: Error, response) => {
-//     if (error) {
-//       console.log(`Weatherstack API is not available: ${error.message}`);
-//     } else if (response.body.error) {
-//       console.log(`Weatherstack API error: ${response.body.error.type}`);
-//     } else {
-//       console.log(response.body);
-//     }
-//   });
-// };
-
-// weatherInfo(process.argv[2]);
-
-// Ejemplo de patrón callback
-
-/**
- * Vemos que ahora a la función weatherInfor le añadimos un segundo parámetro que es un callback.
- * Que es una función que recibe un error y los datos de la petición simplemente.
- * Ahora ese callback es el que se encarga de manejar la respuesta de la api.
- *
- * De esta forma, podemos manejar la respuesta de la api fuera de la función.
- */
-
-export const weatherInfo = (
-  location: string,
-  callback: (
-    err: string | undefined,
-    data: request.Response | undefined,
-  ) => void,
-) => {
-  const url = `http://api.weatherstack.com/current?access_key=aeb97bf5fbae1e796215bb0be875d548&query=${encodeURIComponent(location)}&units=m`;
-
-  request({ url: url, json: true }, (error: Error, response) => {
-    if (error) {
-      callback(
-        `Weatherstack API is not available: ${error.message}`,
-        undefined,
-      );
-    } else if (response.body.error) {
-      callback(
-        `Weatherstack API error: ${response.body.error.type}`,
-        undefined,
-      );
-    } else {
-      callback(undefined, response);
+  constructor(userName?: string) {
+    if (userName) {
+      this.userName = userName;
+      this.userDirectory = path.join(this.userCollectionPath, this.userName);
     }
-  });
-};
+  }
+  /**
+   * Devuelve la ruta de la colección del usuario.
+   * @returns La ruta de la colección del usuario.
+   */
+  public getUserCollectionDirectory(): string {
+    return this.userDirectory;
+  }
 
-/**
- * Ahora podemos manejar la respuesta de la api fuera de la función.
- *
- * Vemos que el callback recibe un error y los datos de la petición.
- * Y podemos manejar la respuesta de la api sin problemas.
- */
-// weatherInfo(process.argv[2], (err, data) => {
-//   if (err) {
-//     console.log(err);
-//   } else if (data) {
-//     console.log(data.body);
-//   }
-// });
+  /**
+   * Devuelve el nombre del usuario.
+   * @returns El nombre del usuario.
+   */
+  public getUserName(): string {
+    return this.userName;
+  }
 
-// Por así decirlo estamos encadenando callbacks de cierta manera
+  /**
+   * Actualiza el nombre del usuario.
+   * @param newUser El nuevo nombre del usuario.
+   */
+  public updateUser(newUser: string): void {
+    this.userName = newUser;
+    this.userDirectory = path.join(this.userCollectionPath, this.userName);
+  }
 
-// El patrón callback chaining, para poder encadenar varias llamadas asíncronas.
+  /**
+   * Obtiene la ruta de un archivo de carta.
+   * @param id El identificador de la carta.
+   * @returns La ruta del archivo de la carta.
+   */
+  private getCardFilePath(id: number): string {
+    return path.join(this.userDirectory, `${id}.json`);
+  }
 
-/**
- * Definicion de otra función que recibe un location y un callback.
- */
-export const coordinatesInfo = (
-  location: string,
-  callback: (
-    err: string | undefined,
-    data: request.Response | undefined,
-  ) => void,
-) => {
-  const url = `http://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=pk.eyJ1IjoiZWR1c2VncmUiLCJhIjoiY2tubmdoMjE0MDA3ODJubndrNnBuenlteCJ9.dtIf0MrkO0Oe12ZM_I7pGw&limit=1`;
+  /**
+   * Lee la colección de cartas del usuario.
+   * @returns La colección de cartas del usuario.
+   */
+  private readCollection(): ICard[] {
+    const files = fs.readdirSync(this.userDirectory);
+    const cards: ICard[] = [];
 
-  request({ url: url, json: true }, (error: Error, response) => {
-    if (error) {
-      callback(`Mapbox API is not available: ${error.message}`, undefined);
-    } else if (response.body.features.length === 0) {
-      callback(`Mapbox API error: no location found`, undefined);
-    } else {
-      callback(undefined, response);
+    for (const file of files) {
+      const filePath = path.join(this.userDirectory, file);
+      const data = fs.readFileSync(filePath, "utf-8");
+      const card = JSON.parse(data);
+      cards.push(card);
     }
-  });
-};
 
-/**
- * Y ahora en la evaluación de la respuesta de la api de las coordenadas, llamamos a la función weatherInfo.
- * Encadenando las llamadas asíncronas. Estamos haciendo un callback chaining.
- * Utilizamos el callback de la función anterior para llamar a la siguiente.
- */
-// coordinatesInfo(process.argv[2], (coordErr, coordData) => {
-//   if (coordErr) {
-//     console.log(coordErr);
-//   } else if (coordData) {
-//     const longitude: number = coordData.body.features[0].center[0];
-//     const latitude: number = coordData.body.features[0].center[1];
-//     weatherInfo(`${latitude},${longitude}`, (weatherErr, weatherData) => {
-//       if (weatherErr) {
-//         console.log(weatherErr);
-//       } else if (weatherData) {
-//         console.log(
-//           `Currently, the temperature is ` +
-//             `${weatherData.body.current.temperature} degrees in ` +
-//             `${weatherData.body.location.name}`,
-//         );
-//       }
-//     });
-//   }
-// });
+    return cards;
+  }
 
-// Ejemplos de ejecución
-/**
-   * $node dist/index.js 'Barcelona, Spain'
-Currently, the temperature is 15 degrees in Barcelona
-$node dist/index.js 'Madrid, Spain'
-Currently, the temperature is 18 degrees in Madrid
-$node dist/index.js 'Kyoto, Japan'
-Currently, the temperature is 20 degrees in Kyoto
-$node dist/index.js 'wherever12'
-Mapbox API error: no location found
+  /**
+   * Escribe una carta en un archivo.
+   * @param card Carta a escribir.
+   */
+  private writeCardToFile(card: ICard): void {
+    const filePath = this.getCardFilePath(card.id);
+    const directoryPath = path.dirname(filePath);
+
+    if (!fs.existsSync(directoryPath)) {
+      fs.mkdirSync(directoryPath, { recursive: true });
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(card, null, 1));
+  }
+
+  /**
+   * Elimina un archivo de carta.
+   * @param id Identificador de la carta.
+   */
+  private deleteCardFile(id: number): void {
+    const filePath = this.getCardFilePath(id);
+    fs.unlinkSync(filePath);
+  }
+
+  /**
+   * Método público para mostrar una carta de la colección.
+   * @param id Identificador de la carta.
+   */
+  public showCard(id: number): void {
+    const filePath = this.getCardFilePath(id);
+
+    if (!fs.existsSync(this.userDirectory)) {
+      throw new Error("Collection not found");
+    }
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error("Card not found");
+    }
+
+    const data = fs.readFileSync(filePath, "utf-8");
+    const card = JSON.parse(data);
+    this.printCard(card);
+  }
+
+  /**
+   * Método público para actualizar una carta de la colección.
+   * @param card Carta a la que se va a actualizar.
+   * @param id Identificador de la carta.
+   */
+  public updateCard(card: ICard, id: number): void {
+    if (card.id !== id) {
+      throw new Error("Card ID and parameter ID do not match");
+    }
+
+    const filePath = this.getCardFilePath(id);
+
+    if (!fs.existsSync(this.userDirectory)) {
+      throw new Error("Collection not found");
+    }
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error("Card not found at " + this.userName + " collection");
+    }
+
+    this.writeCardToFile(card);
+  }
+
+  /**
+   * Método público para listar las cartas de la colección.
+   */
+  public listCollection(): void {
+    if (!fs.existsSync(this.userDirectory)) {
+      throw new Error("Collection not found");
+    }
+    const cards = this.readCollection();
+
+    if (cards.length === 0) {
+      throw new Error("Collection is empty");
+    }
+
+    console.log(chalk.green.bold("Collection of " + this.userName + ":"));
+    cards.forEach((card) => {
+      console.log("---------------------------------");
+      this.printCard(card);
+    });
+  }
+
+  /**
+   * Método privado para imprimir una carta.
+   * @param card Carta a imprimir.
+   */
+  private printCard(card: ICard): void {
+    const colorName = Object.keys(Color).find(
+      (key) => Color[key as keyof typeof Color] === card.color,
+    );
+    console.log(
+      "\n " + chalk.blue.bold("Card ID: ") + card.id + "\n",
+      chalk.blue.bold("Card Name: ") + card.name + "\n",
+      chalk.blue.bold("Card Mana Cost: ") + card.manaCost + "\n",
+      chalk.hex(card.color).bold("Card Color: ") + colorName + "\n",
+      chalk.blue.bold("Card Type Line: ") + card.lineType + "\n",
+      chalk.blue.bold("Card Rarity: ") + card.rarity + "\n",
+      chalk.blue.bold("Card Rules Text: ") + card.ruleText + "\n",
+      chalk.blue.bold("Card Market Value: ") + card.marketValue + "\n",
+    );
+  }
+
+  /**
+   * Método público para obtener una carta de la colección.
+   * @param id Identificador de la carta.
+   * @returns La carta de la colección.
+   */
+  public getCard(id: number): ICard {
+    const filePath = this.getCardFilePath(id);
+
+    if (!fs.existsSync(this.userDirectory)) {
+      throw new Error("Collection not found");
+    }
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error("Card not found at " + this.userName + " collection");
+    }
+
+    const data = fs.readFileSync(filePath, "utf-8");
+    const card = JSON.parse(data);
+    return card;
+  }
+
+  /**
+   * Método público para limpiar la colección.
+   * Limpia el directorio de la colección del usuario.
+   */
+  public clearCollection(): void {
+    if (!fs.existsSync(this.userDirectory)) {
+      return;
+    }
+    const files = fs.readdirSync(this.userDirectory);
+
+    for (const file of files) {
+      const filePath = path.join(this.userDirectory, file);
+      fs.unlinkSync(filePath);
+    }
+  }
+
+  /**
+   * Modificaciones de la sesion PE101
    */
 
-// ------------------- Ejemplo casero con una de las funciones para añadir una carta a la colección -------------------
+  /**
+   * Escribe una tarjeta en un archivo de forma asíncrona.
+   *
+   * @param card La tarjeta a escribir en el archivo.
+   * @param callback Una función de devolución de llamada que se ejecuta después de que se complete la escritura del archivo.
+   *                 Recibe un parámetro de error en caso de que ocurra un error durante la escritura.
+   */
+  private writeCardToFileAsync(
+    card: ICard,
+    callback: (error: Error | null) => void,
+  ): void {
+    const filePath = this.getCardFilePath(card.id);
+    const directoryPath = path.dirname(filePath);
 
-import { ICard } from "../ICard.js";
-import { writeFile } from "fs";
+    fs.mkdir(directoryPath, { recursive: true }, (error) => {
+      if (error) {
+        return callback(error);
+      }
 
+      fs.writeFile(filePath, JSON.stringify(card, null, 1), (error) => {
+        if (error) {
+          return callback(error);
+        }
+        callback(null);
+      });
+    });
+  }
 
-export const addCard = (
-  card: ICard,
-  callback: (error: Error | undefined, data: string | undefined) => void,
-) => {
-  const filePath = `./data/${card.id}.json`;
-  writeFile(filePath, JSON.stringify(card, undefined, 2), (error) => {
-    if (error) {
-      callback(error, undefined);
-    } else {
-      callback(undefined, JSON.stringify(card, undefined, 3));
-    }
-  });
-};
+  /**
+   * Método público para añadir una carta a la colección de forma asíncrona.
+   *
+   * @param card La carta a añadir a la colección.
+   * @param callback Una función de devolución de llamada que se ejecuta después de que se complete la operación.
+   *                 Recibe un parámetro de error en caso de que ocurra un error durante la operación.
+   */
+  public addCard(card: ICard, callback: (error: Error | null) => void): void {
+    const filePath = this.getCardFilePath(card.id);
 
-import { Color } from "../IColor.js";
-import { Rarity } from "../IRarity.js";
-import { TypeLine } from "../ITypeLine.js"
+    this.cardExists(card.id, (exists) => {
+      if (exists) {
+        return callback(
+          new Error("Card already exists at " + this.userName + " collection"),
+        );
+      }
 
-const carta: ICard = {
-    id: 1,
-    name: "testCard",
-    manaCost: 1,
-    color: Color.Red,
-    lineType: TypeLine.Artifact,
-    rarity: Rarity.Common,
-    ruleText: "test rule text",
-    strength: 1,
-    endurance: 1,
-    brandsLoyalty: 7,
-    marketValue: 1,
-};
+      if (card.lineType === "Creature" && (!card.strength || !card.endurance)) {
+        return callback(
+          new Error("Creature card must have strength and endurance"),
+        );
+      }
 
-addCard(carta, (error, data) => {
-    if (error) {
-        console.log("Error al añadir carta")
-        console.log(error);
-    } else if (data) {
-        console.log("Carta añadida correctamente");
-        console.log(data);
-    }
-})
+      if (card.lineType === "Planeswalker" && !card.brandsLoyalty) {
+        return callback(
+          new Error("Planeswalker card must have brands loyalty"),
+        );
+      }
 
+      this.writeCardToFileAsync(card, (error) => {
+        if (error) {
+          return callback(error);
+        }
+        callback(null);
+      });
+    });
+  }
 
+  /**
+   * Método público para eliminar una carta de la colección de forma asíncrona.
+   *
+   * @param id El identificador de la carta a eliminar.
+   * @param callback Una función de devolución de llamada que se ejecuta después de que se complete la operación.
+   *                 Recibe un parámetro de error en caso de que ocurra un error durante la operación.
+   */
+  public removeCard(id: number, callback: (error: Error | null) => void): void {
+    this.cardExists(id, (exists) => {
+      if (!exists) {
+        return callback(
+          new Error("Card not found at " + this.userName + " collection"),
+        );
+      }
+
+      const filePath = this.getCardFilePath(id);
+      this.deleteCardFileAsync(filePath, (error) => {
+        if (error) {
+          return callback(error);
+        }
+        callback(null);
+      });
+    });
+  }
+
+  /**
+   * Método privado para eliminar un archivo de carta de forma asíncrona.
+   *
+   * @param filePath La ruta del archivo de la carta a eliminar.
+   * @param callback Una función de devolución de llamada que se ejecuta después de que se complete la eliminación del archivo.
+   *                 Recibe un parámetro de error en caso de que ocurra un error durante la eliminación.
+   */
+  private deleteCardFileAsync(
+    filePath: string,
+    callback: (error: Error | null) => void,
+  ): void {
+    fs.unlink(filePath, (error) => {
+      if (error) {
+        return callback(error);
+      }
+      callback(null);
+    });
+  }
+
+  /**
+   * Método privado para comprobar si una carta existe.
+   *
+   * @param id El identificador de la carta a comprobar.
+   * @param callback Una función de devolución de llamada que se ejecuta después de que se complete la comprobación.
+   *                 Recibe un parámetro booleano que indica si la carta existe o no.
+   */
+  private cardExists(id: number, callback: (exists: boolean) => void): void {
+    const filePath = this.getCardFilePath(id);
+
+    fs.access(filePath, fs.constants.F_OK, (error) => {
+      if (error) {
+        callback(false);
+      } else {
+        callback(true);
+      }
+    });
+  }
+}
