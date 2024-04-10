@@ -3,7 +3,7 @@
       "./src/*.ts",
   ],
   "out": "./docs",
-  "name": "💻 Práctica 9 - Aplicación para coleccionistas de cartas Magic 🪄 💻",
+  "name": "💻 Práctica 10 - Aplicación cliente-servidor para coleccionistas de cartas Magic 💻",
   "plugin": ["typedoc-material-theme"],
   "themeColor": "#00FF73"
 }
