@@ -19,6 +19,10 @@ export class MagicClient {
   constructor(private puerto: number = 60300) {
     this.puerto = puerto;
     this.socket = net.connect({ port: this.puerto });
+
+    this.socket.on("error", (error) => {
+      console.log("Ha ocurrido un error al conectar con el servidor: " + error);
+    });
   }
 
   public enviarArgumentos(argumentos: string): void {

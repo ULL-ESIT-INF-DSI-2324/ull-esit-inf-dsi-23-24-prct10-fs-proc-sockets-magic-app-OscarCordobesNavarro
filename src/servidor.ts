@@ -17,21 +17,21 @@ let wholeData = "";
 const server = net.createServer((socket) => {
   console.log("Cliente conectado" + " " + new Date().toISOString() + " " + socket.address());
 
-  server.on("data", (data) => {
+  socket.on("data", (data) => {
     wholeData += data;
   });
 
-  server.on("end", () => {
+  socket.on("end", () => {
     console.log("Cliente desconectado a las " + new Date().toISOString());
     const message = JSON.parse(wholeData);
     console.log("Datos recibidos: " + message);
   });
 
-  server.on("close", () => {
+  socket.on("close", () => {
     console.log("Cliente desconectado");
   });
 
-  server.on("error", (error) => {
+  socket.on("error", (error) => {
     console.log("Error: " + error);
   });
 
