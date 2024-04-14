@@ -7,11 +7,12 @@ import { TypeLine } from "../src/Previo/ITypeLine.js";
 import { ICard } from "../src/Previo/ICard.js";
 import { error } from "console";
 import fs from "fs";
+import chalk from "chalk";
 
 // Deshabilitamos la salida estandar
-before(()=> {
-    console.log = () => {};
-})
+before(() => {
+  console.log = () => {};
+});
 
 describe("CardCollectionsHandlerAsync tests", () => {
   describe("basic methods test", () => {
@@ -288,7 +289,9 @@ describe("CardCollectionsHandlerAsync tests", () => {
             if (errorAdd) {
               expect(errorAdd).to.not.be.null;
               expect(errorAdd.message).to.equal(
-                "Creature card must have strength and endurance",
+                chalk.red.bold(
+                  "Creature card must have strength and endurance",
+                ),
               );
               done();
             }
@@ -321,7 +324,7 @@ describe("CardCollectionsHandlerAsync tests", () => {
             if (errorAdd) {
               expect(errorAdd).to.not.be.null;
               expect(errorAdd.message).to.equal(
-                "Planeswalker card must have brands loyalty",
+                chalk.red.bold("Planeswalker card must have brands loyalty"),
               );
               done();
             }
@@ -333,33 +336,37 @@ describe("CardCollectionsHandlerAsync tests", () => {
       const handler = new CardCollectionsHandlerAsync(
         "testCollectionIndexAsyncEmpty",
       );
-      
+
       // Creamos un directorio vacio
-      fs.access("./data/testCollectionIndexAsyncEmpty", fs.constants.F_OK, (err) => {
-        if (err) {
-          fs.mkdir("./data/testCollectionIndexAsyncEmpty", (err) => {
-            if (err) {
-              done(err);
-            } else {
-              handler.getCard(1, (error, card) => {
-                if (error) {
-                  done();
-                } else {
-                  done(new Error("The card was found"));
-                }
-              });
-            }
-          });
-        } else {
-          handler.getCard(1, (error, card) => {
-            if (error) {
-              done();
-            } else {
-              done(new Error("The card was found"));
-            }
-          });
-        }
-      });
+      fs.access(
+        "./data/testCollectionIndexAsyncEmpty",
+        fs.constants.F_OK,
+        (err) => {
+          if (err) {
+            fs.mkdir("./data/testCollectionIndexAsyncEmpty", (err) => {
+              if (err) {
+                done(err);
+              } else {
+                handler.getCard(1, (error, card) => {
+                  if (error) {
+                    done();
+                  } else {
+                    done(new Error("The card was found"));
+                  }
+                });
+              }
+            });
+          } else {
+            handler.getCard(1, (error, card) => {
+              if (error) {
+                done();
+              } else {
+                done(new Error("The card was found"));
+              }
+            });
+          }
+        },
+      );
     });
   });
   describe("updateCard method test", () => {
@@ -495,7 +502,7 @@ describe("CardCollectionsHandlerAsync tests", () => {
                 if (error) {
                   expect(error).to.not.be.null;
                   expect(error.message).to.equal(
-                    "Card ID and parameter ID do not match",
+                    chalk.red.bold("Card ID and parameter ID do not match")
                   );
                   done();
                 } else {
@@ -556,7 +563,9 @@ describe("CardCollectionsHandlerAsync tests", () => {
             if (error) {
               expect(error).to.not.be.null;
               expect(error.message).to.equal(
-                "Creature card must have strength and endurance",
+                chalk.red.bold(
+                  "Creature card must have strength and endurance",
+                ),
               );
               done();
             }
@@ -588,7 +597,7 @@ describe("CardCollectionsHandlerAsync tests", () => {
             if (error) {
               expect(error).to.not.be.null;
               expect(error.message).to.equal(
-                "Planeswalker card must have brands loyalty",
+                chalk.red.bold("Planeswalker card must have brands loyalty"),
               );
               done();
             }

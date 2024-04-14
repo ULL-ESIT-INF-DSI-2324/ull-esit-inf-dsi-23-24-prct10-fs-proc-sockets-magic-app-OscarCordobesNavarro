@@ -12,13 +12,6 @@
 
 import net from "net";
 
-export enum MessageType {
-  READ = "read",
-  ADD = "add",
-  REMOVE = "remove",
-  UPDATE = "update",
-  LIST = "list",
-}
 
 export class MagicClient {
   private socket: net.Socket;

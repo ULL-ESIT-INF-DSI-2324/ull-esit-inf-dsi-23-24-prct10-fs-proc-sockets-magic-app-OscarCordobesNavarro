@@ -13,13 +13,12 @@
 import chalk from "chalk";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { ICard } from "./Previo/ICard.js";
 import { Color } from "./Previo/IColor.js";
 import { Rarity } from "./Previo/IRarity.js";
 import { TypeLine } from "./Previo/ITypeLine.js";
 
 import { MagicClient } from "./cliente.js";
-import { MessageType } from "./cliente.js";
+import { MessageType } from "./MessageType.js";
 
 /**
  * Función principal que gestiona los comandos de la aplicación
@@ -154,7 +153,7 @@ yargs(hideBin(process.argv))
         }),
       );
     },
-  )
+  ).strict()
   .command(
     "remove",
     "Remove a card of the user collection",
@@ -183,6 +182,13 @@ yargs(hideBin(process.argv))
       //   console.log(chalk.red(error.message));
       //   return;
       // }
+      const client = new MagicClient();
+      client.init(
+        JSON.stringify({
+          type: MessageType.REMOVE,
+          data: [argv.user, argv.id.toString()],
+        }),
+      );
     },
   )
   .strict()
@@ -217,7 +223,7 @@ yargs(hideBin(process.argv))
         }),
       );
     },
-  )
+  ).strict()
   .command(
     "update",
     "Update a card of the user collection",
@@ -351,8 +357,28 @@ yargs(hideBin(process.argv))
       //   console.log(chalk.red(error.message));
       //   return;
       // }
+      const client = new MagicClient();
+      client.init(
+        JSON.stringify({
+          type: MessageType.UPDATE,
+          data: [
+            argv.user,
+            argv.id.toString(),
+            argv.name,
+            argv.manaCost?.toString(),
+            argv.color,
+            argv.lineType,
+            argv.rarity,
+            argv.ruleText,
+            argv.strength?.toString(),
+            argv.endurance?.toString(),
+            argv.brandsLoyalty?.toString(),
+            argv.marketValue?.toString(),
+          ],
+        }),
+      );
     },
-  )
+  ).strict()
   .command(
     "list",
     "List all cards of the user collection",
@@ -365,13 +391,13 @@ yargs(hideBin(process.argv))
       },
     },
     (argv) => {
-      // const cardHandler = new CardCollectionsHandler(argv.user);
-      // try {
-      //   cardHandler.listCollection();
-      // } catch (error) {
-      //   console.log(chalk.red(error.message));
-      //   return;
-      // }
+      const client = new MagicClient();
+      client.init(
+        JSON.stringify({
+          type: MessageType.LIST,
+          data: [argv.user],
+        }),
+      );
     },
   )
   .help().argv;

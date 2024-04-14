@@ -8,103 +8,98 @@
  * Correo: alu0101478081@ull.edu.es
  * Fecha: 10/04/2024
  * Práctica 10: Modificacion PE101
-*/
+ */
 
 import net from "net";
-import { MessageType } from "./cliente.js";
+import { MessageType } from "./MessageType.js";
 import { CardCollectionsHandlerAsync } from "./Previo/CardCollectionsHandler.js";
 import { ICard } from "./Previo/ICard.js";
 import { Color } from "./Previo/IColor.js";
 import { Rarity } from "./Previo/IRarity.js";
 import { TypeLine } from "./Previo/ITypeLine.js";
 import chalk from "chalk";
-
-export interface RequestMessage {
-  type: MessageType;
-  data: string[];
-}
-
-export interface ResponseMessage {
-  success: boolean;
-  data: string;
-}
+import { RequestMessage } from "./IRequestMessage.js";
+import { ResponseMessage } from "./IResponseMessage.js";
 
 // Creamos el buffer vacío
-const server = net.createServer((socket) => {
-  console.log("Cliente conectado" + " " + new Date().toISOString());
-  let buffer = Buffer.alloc(0);
+export const server = net
+  .createServer((socket) => {
+    console.log("Cliente conectado" + " " + new Date().toISOString());
+    let buffer = Buffer.alloc(0);
 
-  socket.on('data', (data) => {
-    buffer = Buffer.concat([buffer, data]);
+    socket.on("data", (data) => {
+      buffer = Buffer.concat([buffer, data]);
 
-    while (buffer.length >= 4) {
-      const longitud = buffer.readInt32BE(0);
+      while (buffer.length >= 4) {
+        const longitud = buffer.readInt32BE(0);
 
-      if (buffer.length >= longitud + 4) {
-        const mensajeString = buffer.subarray(4, longitud + 4).toString('utf8');
+        if (buffer.length >= longitud + 4) {
+          const mensajeString = buffer
+            .subarray(4, longitud + 4)
+            .toString("utf8");
 
-
-        messageHandler(mensajeString, (error, response) => {
-          let responseMessage: ResponseMessage;
-          if (error) {
-            // Creamos un mensaje de respuesta para enviar
-            responseMessage = {
-              success: false,
-              data: error.message
-            };
-          } else if (response) {
-            // Creamos un mensaje de respuesta para enviar
-            responseMessage = {
-              success: true,
-              data: response
-            };
-          } else {
-            responseMessage = {
-              success: false,
-              data: "Error desconocido"
-            };
-          }
-          const respuestaString = JSON.stringify(responseMessage);
-          const longitudRespuesta = Buffer.byteLength(respuestaString, 'utf8');
-          const bufferRespuesta = Buffer.alloc(4 + longitudRespuesta);
-          bufferRespuesta.writeInt32BE(longitudRespuesta, 0);
-          bufferRespuesta.write(respuestaString, 4, 'utf8');
-          socket.write(bufferRespuesta);
-          socket.end();
-        });
-        // Limpieza del buffer
-        buffer = buffer.slice(longitud + 4);
-      } else {
-        break;
+          messageHandler(mensajeString, (error, response) => {
+            let responseMessage: ResponseMessage;
+            if (error) {
+              // Creamos un mensaje de respuesta para enviar
+              responseMessage = {
+                success: false,
+                data: error.message,
+              };
+            } else if (response) {
+              // Creamos un mensaje de respuesta para enviar
+              responseMessage = {
+                success: true,
+                data: response,
+              };
+            } else {
+              responseMessage = {
+                success: false,
+                data: "Error desconocido",
+              };
+            }
+            const respuestaString = JSON.stringify(responseMessage);
+            const longitudRespuesta = Buffer.byteLength(
+              respuestaString,
+              "utf8",
+            );
+            const bufferRespuesta = Buffer.alloc(4 + longitudRespuesta);
+            bufferRespuesta.writeInt32BE(longitudRespuesta, 0);
+            bufferRespuesta.write(respuestaString, 4, "utf8");
+            socket.write(bufferRespuesta);
+            socket.end();
+          });
+          // Limpieza del buffer
+          buffer = buffer.slice(longitud + 4);
+        } else {
+          break;
+        }
       }
-    }
+    });
+
+    socket.on("end", () => {
+      console.log("Cliente desconectado end a las " + new Date().toISOString());
+    });
+
+    socket.on("close", () => {
+      console.log(
+        "Cliente desconectado close a las " + new Date().toISOString(),
+      );
+    });
+
+    socket.on("error", (error) => {
+      console.log("Error: " + error);
+    });
+  })
+  .listen(60300, () => {
+    console.log("Escuchando en el puerto 60300");
   });
 
-  socket.on("end", () => {
-    console.log("Cliente desconectado end a las " + new Date().toISOString());
-  });
-
-  socket.on("close", () => {
-    console.log("Cliente desconectado close a las " + new Date().toISOString());
-  });
-
-  socket.on("error", (error) => {
-    console.log("Error: " + error);
-  });
-
-}).listen(60300, () => {
-  console.log("Escuchando en el puerto 60300");
-});
-
-
-// Funcion asincrona callback que gestiona los mensajes de los clientes
-export function messageHandler(msg: string, callback: (error: Error | null, response?: string) => void) {
-
+export function messageHandler(
+  msg: string,
+  callback: (error: Error | null, response?: string) => void,
+) {
   const message = JSON.parse(msg) as RequestMessage;
-
-  console.log("MENSAJE PARSEADO EN MESSAGE HANDLER: " + message);
-
-  console.log("Tipo de solicitud ->" + message.type);
 
   const handler = new CardCollectionsHandlerAsync(message.data[0]);
 
@@ -134,29 +129,103 @@ export function messageHandler(msg: string, callback: (error: Error | null, resp
       });
       break;
     case MessageType.REMOVE:
-      callback(null, "Carta eliminada");
+      handler.removeCard(parseInt(message.data[1]), (error) => {
+        if (error) {
+          callback(error);
+          return;
+        } else {
+          callback(null, chalk.green.bold("Card removed successfully"));
+        }
+      });
       break;
     case MessageType.READ:
-      console.log("ID: " + message.data[1] + " User: " + message.data[0]);
       handler.getStringCard(parseInt(message.data[1]), (error, string) => {
         if (error) {
           callback(error);
           return;
         } else {
-          console.log("STRING: " + string);
           callback(null, string);
         }
       });
       break;
     case MessageType.UPDATE:
-      callback(null, "Carta actualizada");
+      handler.getCard(parseInt(message.data[1]), (error, card) => {
+        if (error) {
+          callback(error);
+          return;
+        } else if (card) {
+          if (carta.id != card.id) {
+            callback(new Error(chalk.red.bold("Card ID does not match")));
+          }
+          // Obtenemos el color de la carta
+          let newColor: Color = card.color;
+          // Si la carta nueva tiene color, lo actualizamos
+          if (carta.color) {
+            // Comprobamos que el color sea correcto
+            if (Object.values(Color).includes(carta.color)) {
+              newColor = carta.color;
+            } else {
+              callback(new Error(chalk.red.bold("Invalid color")));
+              return;
+            }
+          }
+          // Obtenemos el tipo de linea de la carta
+          let newTypeLine: TypeLine = card.lineType;
+          // Si la carta nueva tiene tipo de linea, lo actualizamos
+          if (carta.lineType) {
+            if (Object.values(TypeLine).includes(carta.lineType)) {
+              newTypeLine = carta.lineType;
+            } else {
+              callback(new Error(chalk.red.bold("Invalid type line")));
+              return;
+            }
+          }
+          // Obtenemos la rareza de la carta
+          let newRarity: Rarity = card.rarity;
+          // Si la carta nueva tiene rareza, lo actualizamos
+          if (carta.rarity) {
+            if (Object.values(Rarity).includes(carta.rarity)) {
+              newRarity = carta.rarity;
+            } else {
+              callback(new Error(chalk.red.bold("Invalid rarity")));
+              return;
+            }
+          }
+            const newCard: ICard = {
+            id: card.id,
+            name: carta.name || card.name,
+            manaCost: carta.manaCost || card.manaCost,
+            color: newColor,
+            lineType: newTypeLine,
+            rarity: newRarity,
+            ruleText: carta.ruleText || card.ruleText,
+            strength: carta.strength || card.strength,
+            endurance: carta.endurance || card.endurance,
+            brandsLoyalty: carta.brandsLoyalty || card.brandsLoyalty,
+            marketValue: carta.marketValue || card.marketValue,
+            };
+          handler.updateCard(newCard, parseInt(message.data[1]), (error) => {
+            if (error) {
+              callback(error);
+              return;
+            } else {
+              callback(null, chalk.green.bold("Card updated successfully"));
+            }
+          });
+        }
+      });
       break;
     case MessageType.LIST:
-      callback(null, "Cartas listadas");
+      handler.getStringCollection((error, string) => {
+        if (error) {
+          callback(error);
+          return;
+        } else {
+          callback(null, string);
+        }
+      });
       break;
     default:
-      callback(new Error("Comando no reconocido"));
+      callback(new Error(chalk.red.bold("Unknown message type")));
   }
-
-
 }

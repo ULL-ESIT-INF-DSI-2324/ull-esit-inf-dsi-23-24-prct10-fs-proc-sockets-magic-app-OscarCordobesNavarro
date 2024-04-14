@@ -344,4 +344,40 @@ export class CardCollectionsHandlerAsync {
       }
     });
   }
+
+  // Funcion que va obteniendo las cartas del directorio del usuario y las va añadiendo a una cadena
+  public getStringCollection(
+    callback: (error: Error | null, collectionString?: string) => void,
+  ): void {
+    this.checkUserDirectory((err) => {
+      if (err) {
+        const error = new Error("Collection not found");
+        return callback(error, undefined);
+      } else {
+        fs.readdir(this.userDirectory, (err, files) => {
+          if (err) {
+            return callback(err, undefined);
+          }
+          if (files.length === 0) {
+            const error = new Error(chalk.red.bold("Collection is empty"));
+            return callback(error, undefined);
+          }
+          let collectionString = chalk.green.bold("Collection of " + this.userName + ":\n");
+          let completed = 0;
+          for (const file of files) {
+            this.getStringCard(parseInt(file), (error, cardString) => {
+              if (error) {
+                return callback(error, undefined);
+              }
+              collectionString += cardString;
+              completed++;
+              if (completed === files.length) {
+                return callback(null, collectionString);
+              }
+            });
+          }
+        });
+      }
+    });
+  }
 }
