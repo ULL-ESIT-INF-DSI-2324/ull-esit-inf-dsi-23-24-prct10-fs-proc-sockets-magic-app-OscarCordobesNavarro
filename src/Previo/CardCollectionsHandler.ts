@@ -25,6 +25,12 @@ export class CardCollectionsHandlerAsync {
       this.userName = userName;
       this.userDirectory = path.join(this.userCollectionPath, this.userName);
     }
+    // Creamos la carpeta data si no existe
+    fs.mkdir(this.userCollectionPath, { recursive: true }, (err) => {
+      if (err) {
+        console.log(chalk.red.bold("Error creating data folder"));
+      }
+    });
   }
 
   public getUserCollectionDirectory(): string {
