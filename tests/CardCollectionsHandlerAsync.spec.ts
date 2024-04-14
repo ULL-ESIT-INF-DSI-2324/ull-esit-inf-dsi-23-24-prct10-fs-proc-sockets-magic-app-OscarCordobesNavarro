@@ -5,7 +5,6 @@ import { Color } from "../src/Previo/IColor.js";
 import { Rarity } from "../src/Previo/IRarity.js";
 import { TypeLine } from "../src/Previo/ITypeLine.js";
 import { ICard } from "../src/Previo/ICard.js";
-import { error } from "console";
 import fs from "fs";
 import chalk from "chalk";
 

@@ -250,7 +250,7 @@ export class CardCollectionsHandlerAsync {
   public listCollection(callback: (error: Error | null) => void): void {
     this.checkUserDirectory((err) => {
       if (err) {
-        const error = new Error("Collection not found");
+        const error = new Error(chalk.red.bold("Collection not found"));
         return callback(error);
       } else {
         fs.readdir(this.userDirectory, (err, files) => {
@@ -357,7 +357,7 @@ export class CardCollectionsHandlerAsync {
   ): void {
     this.checkUserDirectory((err) => {
       if (err) {
-        const error = new Error("Collection not found");
+        const error = new Error(chalk.red.bold("Collection not found"));
         return callback(error, undefined);
       } else {
         fs.readdir(this.userDirectory, (err, files) => {
