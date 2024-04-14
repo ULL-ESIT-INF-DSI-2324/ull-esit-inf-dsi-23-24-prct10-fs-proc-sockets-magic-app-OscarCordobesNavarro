@@ -11,6 +11,7 @@
  */
 
 import { MessageType } from "./MessageType.js";
+
 export interface RequestMessage {
     type: MessageType;
     data: string[];

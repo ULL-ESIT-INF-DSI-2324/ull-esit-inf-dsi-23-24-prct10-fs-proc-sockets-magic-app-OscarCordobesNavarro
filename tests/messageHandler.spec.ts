@@ -1,6 +1,6 @@
 import "mocha";
 import { expect } from "chai";
-import { MagicClient } from "../src/cliente.js";
+import { MagicClient } from "../src/MagicClient.js";
 import { messageHandler } from "../src/messageHandler.js";
 import { CardCollectionsHandlerAsync } from "../src/Previo/CardCollectionsHandlerAsync.js";
 import chalk from "chalk";
@@ -376,5 +376,4 @@ describe("Message handler test", () => {
       );
     });
   });
-  // FIN
 });

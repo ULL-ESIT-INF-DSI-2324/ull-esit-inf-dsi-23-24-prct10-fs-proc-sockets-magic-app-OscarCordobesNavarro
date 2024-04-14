@@ -17,7 +17,7 @@ import { Color } from "./Previo/IColor.js";
 import { Rarity } from "./Previo/IRarity.js";
 import { TypeLine } from "./Previo/ITypeLine.js";
 
-import { MagicClient } from "./cliente.js";
+import { MagicClient } from "./MagicClient.js";
 import { MessageType } from "./MessageType.js";
 
 /**
@@ -172,16 +172,6 @@ yargs(hideBin(process.argv))
       },
     },
     (argv) => {
-      // const cardHandler = new CardCollectionsHandler(argv.user);
-      // try {
-      //   cardHandler.removeCard(argv.id);
-      //   console.log(
-      //     chalk.green("Card removed from " + argv.user + " collection"),
-      //   );
-      // } catch (error) {
-      //   console.log(chalk.red(error.message));
-      //   return;
-      // }
       const client = new MagicClient();
       client.init(
         JSON.stringify({
@@ -297,61 +287,6 @@ yargs(hideBin(process.argv))
       },
     },
     (argv) => {
-      // const cardHandler = new CardCollectionsHandler(argv.user);
-      // // Gestionamos el Color, typeLine y rarity si se pasa
-      // let cardToModify: ICard;
-      // try {
-      //   cardToModify = cardHandler.getCard(argv.id);
-      // } catch (error) {
-      //   console.log(chalk.red(error.message));
-      //   return;
-      // }
-      // let newColor: Color = cardHandler.getCard(argv.id).color;
-      // if (argv.color) {
-      //   newColor = Color[argv.color as keyof typeof Color];
-      //   if (!newColor) {
-      //     console.log(chalk.red("Color not found"));
-      //     return;
-      //   }
-      // }
-      // let newTypeLine: TypeLine = cardHandler.getCard(argv.id).lineType;
-      // if (argv.lineType) {
-      //   newTypeLine = TypeLine[argv.lineType as keyof typeof TypeLine];
-      //   if (!newTypeLine) {
-      //     console.log(chalk.red("Type Line not found"));
-      //     return;
-      //   }
-      // }
-      // let newRarity: Rarity = cardHandler.getCard(argv.id).rarity;
-      // if (argv.rarity) {
-      //   newRarity = Rarity[argv.rarity as keyof typeof Rarity];
-      //   if (!newRarity) {
-      //     console.log(chalk.red("Rarity not found"));
-      //     return;
-      //   }
-      // }
-      // const newCard: ICard = {
-      //   id: argv.id,
-      //   name: argv.name || cardToModify.name,
-      //   manaCost: argv.manaCost || cardToModify.manaCost,
-      //   color: newColor,
-      //   lineType: newTypeLine,
-      //   rarity: newRarity,
-      //   ruleText: argv.ruleText || cardToModify.ruleText,
-      //   strength: argv.strength || cardToModify.strength,
-      //   endurance: argv.endurance || cardToModify.endurance,
-      //   brandsLoyalty: argv.brandsLoyalty || cardToModify.brandsLoyalty,
-      //   marketValue: argv.marketValue || cardToModify.marketValue,
-      // };
-      // try {
-      //   cardHandler.updateCard(newCard, argv.id);
-      //   console.log(
-      //     chalk.green("Card updated at " + argv.user + " collection"),
-      //   );
-      // } catch (error) {
-      //   console.log(chalk.red(error.message));
-      //   return;
-      // }
       const client = new MagicClient();
       client.init(
         JSON.stringify({
