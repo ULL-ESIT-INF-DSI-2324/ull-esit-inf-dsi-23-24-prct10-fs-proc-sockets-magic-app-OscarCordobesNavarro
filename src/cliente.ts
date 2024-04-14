@@ -69,7 +69,7 @@ export class MagicClient {
           console.log(respuesta.data);
 
           // Limpieza del buffer
-          buffer = buffer.slice(longitud + 4);
+          buffer = buffer.subarray(longitud + 4);
         } else {
           break;
         }
