@@ -70,7 +70,7 @@ export const server = net
             socket.end();
           });
           // Limpieza del buffer
-          buffer = buffer.slice(longitud + 4);
+          buffer = buffer.subarray(longitud + 4);
         } else {
           break;
         }
@@ -78,12 +78,12 @@ export const server = net
     });
 
     socket.on("end", () => {
-      console.log("Cliente desconectado end a las " + new Date().toISOString());
+      console.log("Finalizando operacion");
     });
 
     socket.on("close", () => {
       console.log(
-        "Cliente desconectado close a las " + new Date().toISOString(),
+        "Cliente desconectado a las " + new Date().toISOString(),
       );
     });
 
@@ -119,36 +119,46 @@ export function messageHandler(
 
   switch (message.type) {
     case MessageType.ADD:
+      console.log(chalk.yellow("Se ha solicitado añadir una carta por parte del usuario: " + message.data[0]))
       handler.addCard(carta, (error) => {
         if (error) {
+          console.log(chalk.red.bold("Operacion fallida por error: " + error.message));
           callback(error);
           return;
         } else {
+          console.log(chalk.green.bold("Operacion realizada con exito"));
           callback(null, chalk.green.bold("Card added successfully"));
         }
       });
       break;
     case MessageType.REMOVE:
+      console.log(chalk.yellow("Se ha solicitado eliminar una carta por parte del usuario: " + message.data[0]))
       handler.removeCard(parseInt(message.data[1]), (error) => {
         if (error) {
+          console.log(chalk.red.bold("Operacion fallida por error: " + error.message));
           callback(error);
           return;
         } else {
+          console.log(chalk.green.bold("Operacion realizada con exito"));
           callback(null, chalk.green.bold("Card removed successfully"));
         }
       });
       break;
     case MessageType.READ:
+      console.log(chalk.yellow("Se ha solicitado leer una carta por parte del usuario: " + message.data[0]))
       handler.getStringCard(parseInt(message.data[1]), (error, string) => {
         if (error) {
+          console.log(chalk.red.bold("Operacion fallida por error: " + error.message));
           callback(error);
           return;
         } else {
+          console.log(chalk.green.bold("Operacion realizada con exito"));
           callback(null, string);
         }
       });
       break;
     case MessageType.UPDATE:
+      console.log(chalk.yellow("Se ha solicitado actualizar una carta por parte del usuario: " + message.data[0]))
       handler.getCard(parseInt(message.data[1]), (error, card) => {
         if (error) {
           callback(error);
@@ -191,7 +201,7 @@ export function messageHandler(
               return;
             }
           }
-            const newCard: ICard = {
+          const newCard: ICard = {
             id: card.id,
             name: carta.name || card.name,
             manaCost: carta.manaCost || card.manaCost,
@@ -203,12 +213,14 @@ export function messageHandler(
             endurance: carta.endurance || card.endurance,
             brandsLoyalty: carta.brandsLoyalty || card.brandsLoyalty,
             marketValue: carta.marketValue || card.marketValue,
-            };
+          };
           handler.updateCard(newCard, parseInt(message.data[1]), (error) => {
             if (error) {
+              console.log(chalk.red.bold("Operacion fallida por error: " + error.message));
               callback(error);
               return;
             } else {
+              console.log(chalk.green.bold("Operacion realizada con exito"));
               callback(null, chalk.green.bold("Card updated successfully"));
             }
           });
@@ -216,11 +228,14 @@ export function messageHandler(
       });
       break;
     case MessageType.LIST:
+      console.log(chalk.yellow("Se ha solicitado listar todas las cartas por parte del usuario: " + message.data[0]))
       handler.getStringCollection((error, string) => {
         if (error) {
+          console.log(chalk.red.bold("Operacion fallida por error: " + error.message));
           callback(error);
           return;
         } else {
+          console.log(chalk.green.bold("Operacion realizada con exito"));
           callback(null, string);
         }
       });
