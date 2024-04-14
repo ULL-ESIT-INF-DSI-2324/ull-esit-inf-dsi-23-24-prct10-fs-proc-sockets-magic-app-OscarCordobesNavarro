@@ -10,10 +10,13 @@
  * Práctica 10: Modificacion PE101
  */
 
+/**
+ * Enumeración que representa los tipos de mensajes disponibles.
+ */
 export enum MessageType {
-    READ = "read",
-    ADD = "add",
-    REMOVE = "remove",
-    UPDATE = "update",
-    LIST = "list",
-  }
+  READ = "read",
+  ADD = "add",
+  REMOVE = "remove",
+  UPDATE = "update",
+  LIST = "list",
+}

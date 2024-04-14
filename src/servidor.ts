@@ -14,11 +14,21 @@ import net from "net";
 import { ResponseMessage } from "./IResponseMessage.js";
 import { messageHandler } from "./messageHandler.js";
 
+/**
+ * Crea un servidor TCP que escucha en el puerto 60300 y maneja las conexiones de los clientes.
+ *
+ * @param {net.Socket} socket - El socket de la conexión del cliente.
+ */
 export const server = net
   .createServer((socket) => {
     console.log("Cliente conectado" + " " + new Date().toISOString());
     let buffer = Buffer.alloc(0);
 
+    /**
+     * Maneja los datos recibidos del cliente.
+     *
+     * @param {Buffer} data - Los datos recibidos del cliente.
+     */
     socket.on("data", (data) => {
       buffer = Buffer.concat([buffer, data]);
 
@@ -30,6 +40,12 @@ export const server = net
             .subarray(4, longitud + 4)
             .toString("utf8");
 
+          /**
+           * Maneja el mensaje recibido del cliente y envía una respuesta.
+           *
+           * @param {string} mensaje - El mensaje recibido del cliente.
+           * @param {function} callback - La función de devolución de llamada para enviar la respuesta.
+           */
           messageHandler(mensajeString, (error, response) => {
             let responseMessage: ResponseMessage;
             if (error) {
@@ -74,9 +90,7 @@ export const server = net
     });
 
     socket.on("close", () => {
-      console.log(
-        "Cliente desconectado a las " + new Date().toISOString(),
-      );
+      console.log("Cliente desconectado a las " + new Date().toISOString());
     });
 
     socket.on("error", (error) => {
@@ -86,4 +100,3 @@ export const server = net
   .listen(60300, () => {
     console.log("Escuchando en el puerto 60300");
   });
-

@@ -10,7 +10,18 @@
  * Práctica 10: Modificacion PE101
  */
 
+/**
+ * Interfaz que representa un mensaje de respuesta.
+ */
 export interface ResponseMessage {
+  /**
+   * Indica si la operación ha sido exitosa.
+   * @property {boolean} success
+   */
   success: boolean;
+  /**
+   * Datos del mensaje.
+   * @property {string} data
+   */
   data: string;
 }

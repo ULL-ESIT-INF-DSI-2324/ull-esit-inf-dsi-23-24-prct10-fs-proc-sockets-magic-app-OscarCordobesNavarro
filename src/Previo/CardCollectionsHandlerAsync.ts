@@ -33,25 +33,51 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
+  /**
+   * Devuelve el directorio de colección del usuario.
+   * 
+   * @returns El directorio de colección del usuario.
+   */
   public getUserCollectionDirectory(): string {
     return this.userDirectory;
   }
 
+  /**
+   * Devuelve el nombre de usuario.
+   * 
+   * @returns El nombre de usuario.
+   */
   public getUsername(): string {
     return this.userName;
   }
 
+  /**
+   * Actualiza el nombre de usuario.
+   * 
+   * @param newUser El nuevo nombre de usuario.
+   */
   public updateUser(newUser: string): void {
     this.userName = newUser;
     this.userDirectory = path.join(this.userCollectionPath, this.userName);
   }
 
+  /**
+   * Devuelve el path de la carta.
+   * 
+   * @param id El id de la carta.
+   * @returns El path de la carta.
+   */
   private getCardFilePath(id: number): string {
     return path.join(this.userDirectory, `${id}.json`);
   }
 
-  // Funcion que dada una carta, la escribe en el directorio del usuario
-  // con el id de la carta como nombre del archivo .json
+
+  /**
+   * Escribe una carta en un archivo.
+   * 
+   * @param card - La carta a escribir en el archivo.
+   * @param callback - Una función de devolución de llamada que se invoca después de escribir la carta en el archivo. Recibe un parámetro de error en caso de que ocurra algún error durante la escritura.
+   */
   private writeCardToFile(
     card: ICard,
     callback: (error: Error | null) => void,
@@ -72,7 +98,12 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
-  // Funcion que dada una carta y un callback, comprueba si el archivo de la carta ya existe y la escribe
+  /**
+   * Comprueba el archivo de la tarjeta y escribe los datos de la tarjeta en él.
+   * 
+   * @param card - La tarjeta a escribir en el archivo.
+   * @param callback - Una función de devolución de llamada que se invoca después de completar la escritura del archivo.
+   */
   private checkCardFileAndWrite(
     card: ICard,
     callback: (error: Error | null) => void,
@@ -93,7 +124,12 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
-  // Funcion que comprueba de manera asincrona si el directorio de la coleccion del usuario existe
+  /**
+   * Comprueba si el directorio del usuario existe.
+   * 
+   * @param callback - Función de devolución de llamada que se ejecuta después de comprobar el directorio del usuario.
+   * @param error - Error que se pasa a la función de devolución de llamada si el directorio no existe.
+   */
   private checkUserDirectory(callback: (error: Error | null) => void): void {
     fs.access(this.userDirectory, fs.constants.F_OK, (err) => {
       if (err) {
@@ -105,7 +141,12 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
-  // Funcion que comprueba de manera asincrona si el archivo de la carta ya existe
+  /**
+   * Comprueba si existe un archivo de carta.
+   * 
+   * @param id - El ID de la carta.
+   * @param callback - Función de devolución de llamada que se ejecuta después de comprobar el archivo.
+   */
   private checkCardFile(
     id: number,
     callback: (error: Error | null) => void,
@@ -124,7 +165,13 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
-  // Funcion que encapsula la escritura de una carta en un archivo, y escribe la carta
+  /**
+   * Añade una carta a la colección.
+   * 
+   * @param card - La carta que se va a añadir.
+   * @param callback - Una función de devolución de llamada que se ejecutará después de añadir la carta. 
+   *                  Recibe un parámetro de error en caso de que ocurra un error durante la operación.
+   */
   public addCard(card: ICard, callback: (error: Error | null) => void): void {
     if (card.lineType === "Creature" && (!card.strength || !card.endurance)) {
       callback(new Error(chalk.red.bold("Creature card must have strength and endurance")));
@@ -135,6 +182,11 @@ export class CardCollectionsHandlerAsync {
     this.writeCardToFile(card, callback);
   }
 
+  /**
+   * Elimina todos los archivos y directorios de la colección del usuario.
+   * 
+   * @param callback - Función de devolución de llamada que se invoca una vez que se completa la operación. Recibe un parámetro de error que indica si ocurrió algún error durante la eliminación.
+   */
   public clearCollection(callback: (error: Error | null) => void): void {
     fs.access(this.userDirectory, fs.constants.F_OK, (errAccess) => {
       if (errAccess) {
@@ -150,19 +202,27 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
+
+  /**
+   * Obtiene una tarjeta específica según su ID.
+   * 
+   * @param id - El ID de la tarjeta a obtener.
+   * @param callback - Función de devolución de llamada que se ejecuta una vez que se obtiene la tarjeta.
+   *                  Recibe dos parámetros: error y card.
+   *                  - error: Un objeto Error si se produce un error durante la obtención de la tarjeta, o null si no hay errores.
+   *                  - card: La tarjeta obtenida, representada como un objeto ICard, o null si no se encuentra la tarjeta.
+   */
   public getCard(
     id: number,
     callback: (error: Error | null, card: ICard | null) => void,
   ): void {
     const filePath = this.getCardFilePath(id);
 
-    // Comprobamos si el directorio existe
     this.checkUserDirectory((err) => {
       if (err) {
         const error = new Error(chalk.red.bold("Collection not found"));
         return callback(error, null);
       } else {
-        // Comprobamos si el archivo de la carta existe
         fs.access(filePath, fs.constants.F_OK, (errAccess) => {
           if (errAccess) {
             const error = new Error(chalk.red.bold(
@@ -194,6 +254,12 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
+  /**
+   * Elimina una tarjeta del sistema.
+   * 
+   * @param id - El ID de la tarjeta a eliminar.
+   * @param callback - Función de devolución de llamada que se ejecuta una vez que se completa la eliminación de la tarjeta. Recibe un parámetro de error en caso de que ocurra un error durante la eliminación.
+   */
   public removeCard(id: number, callback: (error: Error | null) => void): void {
     const filePath = this.getCardFilePath(id);
 
@@ -221,6 +287,11 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
+  /**
+   * Imprime los detalles de una carta en la consola.
+   * 
+   * @param card - La carta a imprimir.
+   */
   private printCard(card: ICard): void {
     const colorName = Object.keys(Color).find(
       (key) => Color[key as keyof typeof Color] === card.color,
@@ -237,6 +308,13 @@ export class CardCollectionsHandlerAsync {
     );
   }
 
+  /**
+   * Muestra una carta específica.
+   * 
+   * @param id - El ID de la carta a mostrar.
+   * @param callback - Función de devolución de llamada que se ejecuta después de mostrar la carta.
+   *                  Recibe un parámetro de error en caso de que ocurra algún error durante la operación.
+   */
   public showCard(id: number, callback: (error: Error | null) => void): void {
     this.getCard(id, (error, card) => {
       if (error) {
@@ -247,6 +325,11 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
+  /**
+   * Lista las colecciones de tarjetas del usuario.
+   * 
+   * @param callback - Función de devolución de llamada que se ejecuta una vez que se completa la operación. Recibe un parámetro de error en caso de que ocurra un error.
+   */
   public listCollection(callback: (error: Error | null) => void): void {
     this.checkUserDirectory((err) => {
       if (err) {
@@ -279,6 +362,14 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
+  /**
+   * Actualiza una tarjeta en la colección.
+   * 
+   * @param {ICard} card - La tarjeta actualizada.
+   * @param {number} id - El ID de la tarjeta a actualizar.
+   * @param {(error: Error | null) => void} callback - Función de devolución de llamada que se ejecuta después de actualizar la tarjeta.
+   * @returns {void}
+   */
   public updateCard(
     card: ICard,
     id: number,
@@ -309,6 +400,12 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
+  /**
+   * Obtiene una representación en forma de cadena de texto de una carta.
+   * 
+   * @param cardID - El ID de la carta.
+   * @param callback - Una función de devolución de llamada que se invoca con el error (si lo hay) y la cadena de texto de la carta.
+   */
   public getStringCard(
     cardID: number,
     callback: (error: Error | null, cardString?: string) => void,
@@ -351,7 +448,12 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
-  // Funcion que va obteniendo las cartas del directorio del usuario y las va añadiendo a una cadena
+  /**
+   * Obtiene una representación en forma de cadena de la colección de cartas.
+   * 
+   * @param callback - Función de devolución de llamada que se invoca con el resultado de la operación.
+   *                   Recibe un error en caso de fallo o la cadena de la colección en caso de éxito.
+   */
   public getStringCollection(
     callback: (error: Error | null, collectionString?: string) => void,
   ): void {

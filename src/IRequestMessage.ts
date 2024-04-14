@@ -12,7 +12,19 @@
 
 import { MessageType } from "./MessageType.js";
 
+/**
+ * Interfaz que representa un mensaje de solicitud.
+ * @interface RequestMessage
+ */
 export interface RequestMessage {
-    type: MessageType;
-    data: string[];
-  }
+  /**
+   * Tipo de mensaje.
+   * @property {MessageType} type
+   */
+  type: MessageType;
+  /**
+   * Datos del mensaje.
+   * @property {string[]} data
+   */
+  data: string[];
+}

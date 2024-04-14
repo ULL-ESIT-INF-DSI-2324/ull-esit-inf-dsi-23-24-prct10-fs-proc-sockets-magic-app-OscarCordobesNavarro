@@ -12,6 +12,9 @@
 
 import net from "net";
 
+/**
+ * Clase que representa un cliente mágico que se conecta a un servidor mágico.
+ */
 export class MagicClient {
   private socket: net.Socket;
   private data: string = "";
@@ -25,6 +28,10 @@ export class MagicClient {
     });
   }
 
+  /**
+   * Inicializa el cliente mágico enviando un mensaje al servidor y escuchando las respuestas.
+   * @param msg Todos los argumentos que se le pasan al servidor
+   */
   public init(msg: string): void {
     this.sendArgv(msg);
     this.listenServer();
@@ -36,10 +43,8 @@ export class MagicClient {
    * @param argumentos Argumentos que se le pasan al servidor
    */
   private sendArgv(argumentos: string): void {
-    // const mensajeString = JSON.stringify(argumentos);
     const longitudMensaje = Buffer.byteLength(argumentos, "utf8");
 
-    // Creacion del mensaje con longitud
     const mensajeConLongitud = Buffer.alloc(4 + longitudMensaje);
     mensajeConLongitud.writeInt32BE(longitudMensaje, 0);
     mensajeConLongitud.write(argumentos, 4, "utf8");
@@ -47,6 +52,9 @@ export class MagicClient {
     this.socket.write(mensajeConLongitud);
   }
 
+  /**
+   * Escucha los datos recibidos desde el servidor.
+   */
   private listenServer(): void {
     this.socket.on("data", (data) => {
       this.data += data;
@@ -76,4 +84,3 @@ export class MagicClient {
     });
   }
 }
-
