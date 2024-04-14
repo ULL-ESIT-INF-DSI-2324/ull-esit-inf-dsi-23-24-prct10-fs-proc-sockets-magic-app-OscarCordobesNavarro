@@ -13,13 +13,13 @@
 import chalk from "chalk";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { CardCollectionsHandler } from "./Previo/CardCollectionsHandler.js";
 import { ICard } from "./Previo/ICard.js";
 import { Color } from "./Previo/IColor.js";
 import { Rarity } from "./Previo/IRarity.js";
 import { TypeLine } from "./Previo/ITypeLine.js";
 
 import { MagicClient } from "./cliente.js";
+import { MessageType } from "./cliente.js";
 
 /**
  * Función principal que gestiona los comandos de la aplicación
@@ -34,6 +34,7 @@ import { MagicClient } from "./cliente.js";
  * Para mas informacion sobre los comandos y sus opciones, ejecutar el comando --help
  */
 yargs(hideBin(process.argv))
+  .strict()
   .command(
     "add",
     "Add a card to the collection",
@@ -130,6 +131,28 @@ yargs(hideBin(process.argv))
         console.log(chalk.red("Rarity not found"));
         return;
       }
+
+      console.log(JSON.stringify(argv, undefined, 2));
+      const client = new MagicClient();
+      client.init(
+        JSON.stringify({
+          type: MessageType.ADD,
+          data: [
+            argv.user,
+            argv.id.toString(),
+            argv.name,
+            argv.manaCost.toString(),
+            color.toString(),
+            typeLine.toString(),
+            rarity.toString(),
+            argv.ruleText,
+            argv.strength?.toString(),
+            argv.endurance?.toString(),
+            argv.brandsLoyalty?.toString(),
+            argv.marketValue.toString(),
+          ],
+        }),
+      );
     },
   )
   .command(
@@ -162,6 +185,7 @@ yargs(hideBin(process.argv))
       // }
     },
   )
+  .strict()
   .command(
     "read",
     "Read a card of the user collection",
@@ -180,16 +204,18 @@ yargs(hideBin(process.argv))
       },
     },
     (argv) => {
-      //   const cardHandler = new CardCollectionsHandler(argv.user);
-      //   try {
-      //     cardHandler.showCard(argv.id);
-      //   } catch(error) {
-      //     console.log(chalk.red(error.message));
-      //     return;
-      //   }
-      // console.log("Los argumentos son: " + JSON.stringify(argv, undefined, 2));
+      console.log(JSON.stringify(argv, undefined, 2));
       const client = new MagicClient();
-      client.enviarArgumentos(JSON.stringify(argv));
+      console.log(
+        "ESTO ES LO QUE SACA ARGV -> " + argv.user,
+        argv.id.toString(),
+      );
+      client.init(
+        JSON.stringify({
+          type: MessageType.READ,
+          data: [argv.user, argv.id.toString()],
+        }),
+      );
     },
   )
   .command(
@@ -279,7 +305,6 @@ yargs(hideBin(process.argv))
       //   console.log(chalk.red(error.message));
       //   return;
       // }
-
       // let newColor: Color = cardHandler.getCard(argv.id).color;
       // if (argv.color) {
       //   newColor = Color[argv.color as keyof typeof Color];
@@ -288,7 +313,6 @@ yargs(hideBin(process.argv))
       //     return;
       //   }
       // }
-
       // let newTypeLine: TypeLine = cardHandler.getCard(argv.id).lineType;
       // if (argv.lineType) {
       //   newTypeLine = TypeLine[argv.lineType as keyof typeof TypeLine];
@@ -297,7 +321,6 @@ yargs(hideBin(process.argv))
       //     return;
       //   }
       // }
-
       // let newRarity: Rarity = cardHandler.getCard(argv.id).rarity;
       // if (argv.rarity) {
       //   newRarity = Rarity[argv.rarity as keyof typeof Rarity];
@@ -306,7 +329,6 @@ yargs(hideBin(process.argv))
       //     return;
       //   }
       // }
-
       // const newCard: ICard = {
       //   id: argv.id,
       //   name: argv.name || cardToModify.name,
@@ -320,7 +342,6 @@ yargs(hideBin(process.argv))
       //   brandsLoyalty: argv.brandsLoyalty || cardToModify.brandsLoyalty,
       //   marketValue: argv.marketValue || cardToModify.marketValue,
       // };
-
       // try {
       //   cardHandler.updateCard(newCard, argv.id);
       //   console.log(

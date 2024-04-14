@@ -15,7 +15,6 @@ import fs from "fs";
 import path from "path";
 import chalk from "chalk";
 
-
 export class CardCollectionsHandlerAsync {
   private userCollectionPath: string = "./data/";
   private userName: string = "";
@@ -47,7 +46,10 @@ export class CardCollectionsHandlerAsync {
 
   // Funcion que dada una carta, la escribe en el directorio del usuario
   // con el id de la carta como nombre del archivo .json
-  private writeCardToFile(card: ICard, callback: (error: Error | null) => void): void {
+  private writeCardToFile(
+    card: ICard,
+    callback: (error: Error | null) => void,
+  ): void {
     // Comprobamos si el directorio de la coleccion del usuario existe
     this.checkUserDirectory((err) => {
       if (err) {
@@ -65,7 +67,10 @@ export class CardCollectionsHandlerAsync {
   }
 
   // Funcion que dada una carta y un callback, comprueba si el archivo de la carta ya existe y la escribe
-  private checkCardFileAndWrite(card: ICard, callback: (error: Error | null) => void): void {
+  private checkCardFileAndWrite(
+    card: ICard,
+    callback: (error: Error | null) => void,
+  ): void {
     const filePath = this.getCardFilePath(card.id);
     const data = JSON.stringify(card, undefined, 2);
     this.checkCardFile(card.id, (err) => {
@@ -86,7 +91,7 @@ export class CardCollectionsHandlerAsync {
   private checkUserDirectory(callback: (error: Error | null) => void): void {
     fs.access(this.userDirectory, fs.constants.F_OK, (err) => {
       if (err) {
-        const error = new Error("Collection not found");
+        const error = new Error(chalk.red.bold("Collection not found"));
         return callback(error);
       } else {
         return callback(null);
@@ -95,16 +100,19 @@ export class CardCollectionsHandlerAsync {
   }
 
   // Funcion que comprueba de manera asincrona si el archivo de la carta ya existe
-  private checkCardFile(id: number, callback: (error: Error | null) => void): void {
+  private checkCardFile(
+    id: number,
+    callback: (error: Error | null) => void,
+  ): void {
     const filePath = this.getCardFilePath(id);
 
     fs.access(filePath, fs.constants.F_OK, (err) => {
       if (err) {
         return callback(null);
       } else {
-        const error = new Error(
+        const error = new Error(chalk.red.bold(
           `Card already exists at ${this.userName} collection`,
-        );
+        ));
         return callback(error);
       }
     });
@@ -112,12 +120,11 @@ export class CardCollectionsHandlerAsync {
 
   // Funcion que encapsula la escritura de una carta en un archivo, y escribe la carta
   public addCard(card: ICard, callback: (error: Error | null) => void): void {
-
-    if(card.lineType === "Creature" && (!card.strength || !card.endurance)) {
-      callback(new Error("Creature card must have strength and endurance"));
+    if (card.lineType === "Creature" && (!card.strength || !card.endurance)) {
+      callback(new Error(chalk.red.bold("Creature card must have strength and endurance")));
     }
-    if(card.lineType === "Planeswalker" && !card.brandsLoyalty) {
-      callback(new Error("Planeswalker card must have brands loyalty"));
+    if (card.lineType === "Planeswalker" && !card.brandsLoyalty) {
+      callback(new Error(chalk.red.bold("Planeswalker card must have brands loyalty")));
     }
     this.writeCardToFile(card, callback);
   }
@@ -137,28 +144,31 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
-  public getCard(id: number, callback: (error: Error | null, card: ICard | null) => void): void {
+  public getCard(
+    id: number,
+    callback: (error: Error | null, card: ICard | null) => void,
+  ): void {
     const filePath = this.getCardFilePath(id);
 
     // Comprobamos si el directorio existe
     this.checkUserDirectory((err) => {
       if (err) {
-        const error = new Error("Collection not found");
+        const error = new Error(chalk.red.bold("Collection not found"));
         return callback(error, null);
       } else {
         // Comprobamos si el archivo de la carta existe
         fs.access(filePath, fs.constants.F_OK, (errAccess) => {
           if (errAccess) {
-            const error = new Error(
+            const error = new Error(chalk.red.bold(
               `Card not found at ${this.userName} collection`,
-            );
+            ));
             return callback(error, null);
           } else {
             fs.readFile(filePath, "utf-8", (errRead, data) => {
               if (errRead) {
-                const error = new Error(
+                const error = new Error(chalk.red.bold(
                   `Error reading card file: ${errRead.message}`,
-                );
+                ));
                 return callback(error, null);
               }
 
@@ -166,9 +176,9 @@ export class CardCollectionsHandlerAsync {
                 const card = JSON.parse(data) as ICard;
                 return callback(null, card);
               } catch (parseError) {
-                const error = new Error(
+                const error = new Error(chalk.red.bold(
                   `Error parsing card data: ${parseError.message}`,
-                );
+                ));
                 return callback(error, null);
               }
             });
@@ -183,14 +193,14 @@ export class CardCollectionsHandlerAsync {
 
     this.checkUserDirectory((err) => {
       if (err) {
-        const error = new Error("Collection not found");
+        const error = new Error(chalk.red.bold("Collection not found"));
         return callback(error);
       } else {
         fs.access(filePath, fs.constants.F_OK, (errAccess) => {
           if (errAccess) {
-            const error = new Error(
+            const error = new Error(chalk.red.bold(
               `Card not found at ${this.userName} collection`,
-            );
+            ));
             return callback(error);
           } else {
             fs.unlink(filePath, (err) => {
@@ -242,7 +252,7 @@ export class CardCollectionsHandlerAsync {
             return callback(err);
           }
           if (files.length === 0) {
-            const error = new Error("Collection is empty");
+            const error = new Error(chalk.red.bold("Collection is empty"));
             return callback(error);
           }
           console.log(chalk.green.bold("Collection of " + this.userName + ":"));
@@ -263,15 +273,19 @@ export class CardCollectionsHandlerAsync {
     });
   }
 
-  public updateCard(card: ICard, id: number, callback: (error: Error | null) => void): void {
+  public updateCard(
+    card: ICard,
+    id: number,
+    callback: (error: Error | null) => void,
+  ): void {
     if (card.id !== id) {
-      const error = new Error("Card ID and parameter ID do not match");
+      const error = new Error(chalk.red.bold("Card ID and parameter ID do not match"));
       return callback(error);
     }
 
     this.checkUserDirectory((err) => {
       if (err) {
-        const error = new Error("Collection not found");
+        const error = new Error(chalk.red.bold("Collection not found"));
         return callback(error);
       } else {
         this.removeCard(id, (err) => {
@@ -285,6 +299,48 @@ export class CardCollectionsHandlerAsync {
             return callback(null);
           });
         });
+      }
+    });
+  }
+
+  public getStringCard(
+    cardID: number,
+    callback: (error: Error | null, cardString?: string) => void,
+  ): void {
+    this.getCard(cardID, (error, card) => {
+      if (error) {
+        return callback(error, undefined);
+      } else if (card) { // Add null check
+        const colorName = Object.keys(Color).find(
+          (key) => Color[key as keyof typeof Color] === card.color,
+        );
+        const cardString =
+          "\n" +
+          chalk.blue.bold("Card ID: ") +
+          card.id +
+          "\n" +
+          chalk.blue.bold("Card Name: ") +
+          card.name +
+          "\n" +
+          chalk.blue.bold("Card Mana Cost: ") +
+          card.manaCost +
+          "\n" +
+          chalk.hex(card.color).bold("Card Color: ") +
+          colorName +
+          "\n" +
+          chalk.blue.bold("Card Type Line: ") +
+          card.lineType +
+          "\n" +
+          chalk.blue.bold("Card Rarity: ") +
+          card.rarity +
+          "\n" +
+          chalk.blue.bold("Card Rules Text: ") +
+          card.ruleText +
+          "\n" +
+          chalk.blue.bold("Card Market Value: ") +
+          card.marketValue +
+          "\n";
+        return callback(null, cardString);
       }
     });
   }
