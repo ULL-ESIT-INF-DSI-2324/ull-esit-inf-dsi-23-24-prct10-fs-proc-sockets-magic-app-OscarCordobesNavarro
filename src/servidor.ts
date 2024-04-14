@@ -12,7 +12,7 @@
 
 import net from "net";
 import { MessageType } from "./MessageType.js";
-import { CardCollectionsHandlerAsync } from "./Previo/CardCollectionsHandler.js";
+import { CardCollectionsHandlerAsync } from "./Previo/CardCollectionsHandlerAsync.js";
 import { ICard } from "./Previo/ICard.js";
 import { Color } from "./Previo/IColor.js";
 import { Rarity } from "./Previo/IRarity.js";

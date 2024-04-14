@@ -1,6 +1,6 @@
 import "mocha";
 import { expect } from "chai";
-import { CardCollectionsHandlerAsync } from "../src/Previo/CardCollectionsHandler.js";
+import { CardCollectionsHandlerAsync } from "../src/Previo/CardCollectionsHandlerAsync.js";
 import { Color } from "../src/Previo/IColor.js";
 import { Rarity } from "../src/Previo/IRarity.js";
 import { TypeLine } from "../src/Previo/ITypeLine.js";

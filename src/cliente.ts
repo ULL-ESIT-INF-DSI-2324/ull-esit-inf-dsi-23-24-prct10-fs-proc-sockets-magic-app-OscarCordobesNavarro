@@ -37,9 +37,6 @@ export class MagicClient {
    * @param argumentos Argumentos que se le pasan al servidor
    */
   private sendArgv(argumentos: string): void {
-    console.log("Argumentos del cliente: " + argumentos);
-    // Dividimos los argumentos por su espacio
-
     // const mensajeString = JSON.stringify(argumentos);
     const longitudMensaje = Buffer.byteLength(argumentos, "utf8");
 
@@ -56,10 +53,6 @@ export class MagicClient {
       this.data += data;
     });
 
-    this.socket.on("close", () => {
-      console.log("Cliente desconectado");
-    });
-
     this.socket.on("data", (data) => {
       let buffer = Buffer.from(data);
 
@@ -68,12 +61,12 @@ export class MagicClient {
 
         if (buffer.length >= longitud + 4) {
           const respuestaString = buffer
-            .slice(4, longitud + 4)
+            .subarray(4, longitud + 4)
             .toString("utf8");
           const respuesta = JSON.parse(respuestaString);
 
           // Aquí puedes procesar la respuesta recibida
-          console.log("Respuesta recibida:", respuesta.data);
+          console.log(respuesta.data);
 
           // Limpieza del buffer
           buffer = buffer.slice(longitud + 4);
@@ -85,5 +78,3 @@ export class MagicClient {
   }
 }
 
-// const client = new MagicClient();
-// client.init();

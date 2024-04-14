@@ -210,12 +210,7 @@ yargs(hideBin(process.argv))
       },
     },
     (argv) => {
-      console.log(JSON.stringify(argv, undefined, 2));
       const client = new MagicClient();
-      console.log(
-        "ESTO ES LO QUE SACA ARGV -> " + argv.user,
-        argv.id.toString(),
-      );
       client.init(
         JSON.stringify({
           type: MessageType.READ,
