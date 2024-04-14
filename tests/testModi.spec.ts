@@ -1,9 +1,9 @@
 import "mocha";
 import { expect } from "chai";
-import { Color } from "../src/IColor.js";
-import { Rarity } from "../src/IRarity.js";
-import { TypeLine } from "../src/ITypeLine.js";
-import { ICard } from "../src/ICard.js";
+import { Color } from "../src/Previo/IColor.js";
+import { Rarity } from "../src/Previo/IRarity.js";
+import { TypeLine } from "../src/Previo/ITypeLine.js";
+import { ICard } from "../src/Previo/ICard.js";
 import { CardCollectionsHandlerAsync } from "../src/Modificacion/index.js";
 
 describe("Asyncronous function addCard from CardCollectionsHandlerAsync", () => {
@@ -59,7 +59,7 @@ describe("Asyncronous function addCard from CardCollectionsHandlerAsync", () => 
         );
         done();
       });
-    }, 1000);
+    }, 500);
   });
 
   it("remove a card that exists should not provide an error", (done) => {
@@ -89,7 +89,7 @@ describe("Asyncronous function addCard from CardCollectionsHandlerAsync", () => 
         expect(error).to.be.null;
         done();
       });
-    }, 1000);
+    }, 500);
   });
 
   it("remove a card that does not exist should provide an error", (done) => {
